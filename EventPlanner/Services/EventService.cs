@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using RestSharp;
+using EventPlanner.Models;
+using Newtonsoft.Json;
 
 namespace EventPlanner.Services;
 
@@ -13,7 +15,8 @@ public class EventService
                   ?? throw new InvalidOperationException("Ticketmaster API key is missing.");
     }
 
-    public async Task<string> GetEventsAsync()
+    
+    public async Task<List<EventPlanner.Models.Event>> GetEventsAsync()
     {
         var client = new RestClient("https://app.ticketmaster.com/discovery/v2/");
         var request = new RestRequest("events.json", Method.Get);
@@ -30,6 +33,10 @@ public class EventService
                 $"Ticketmaster API request failed: {response.StatusCode}");
         }
 
-        return response.Content;
+        var eventResponse =
+            JsonConvert.DeserializeObject<EventResponse>(response.Content);
+
+        return eventResponse?.Embedded?.Events
+               ?? new List<EventPlanner.Models.Event>();
     }
 }

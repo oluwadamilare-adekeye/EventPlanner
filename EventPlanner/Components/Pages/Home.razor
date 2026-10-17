@@ -6,7 +6,6 @@
 <PageTitle>Event Planner</PageTitle>
 
 <h1>Event Planner</h1>
-
 <p>Discover events happening in Ireland.</p>
 
 <button class="btn btn-primary" @onclick="LoadEvents">
@@ -15,9 +14,25 @@
 
 <p>@message</p>
 
-@code {
-    private string message = "Click the button to load events.";
+@if (events.Count > 0)
+{
+    <ul>
+        @foreach (var item in events)
+        {
+            <li>
+                <strong>@item.Name</strong>
+                -
+                <a href="@item.Url" target="_blank" rel="noopener noreferrer">
+                    View Tickets
+                </a>
+            </li>
+        }
+    </ul>
+}
 
+@code {
+    private List<EventPlanner.Models.Event> events = new();
+    private string message = "Click the button to load events.";
 
     private async Task LoadEvents()
     {
@@ -25,11 +40,13 @@
 
         try
         {
-            var json = await EventService.GetEventsAsync();
-            message = $"Success! Received {json.Length} characters of JSON.";
+            events = await EventService.GetEventsAsync();
+
+            message = $"Found {events.Count} events!";
         }
         catch (Exception ex)
         {
+            events.Clear();
             message = $"Error: {ex.Message}";
         }
     }
