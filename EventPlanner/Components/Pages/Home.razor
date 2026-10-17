@@ -8,27 +8,63 @@
 <h1>Event Planner</h1>
 <p>Discover events happening in Ireland.</p>
 
-<button class="btn btn-primary" @onclick="LoadEvents">
+<button class="btn btn-primary mb-3" @onclick="LoadEvents">
     Get Events
 </button>
 
 <p>@message</p>
 
-@if (events.Count > 0)
-{
-    <ul>
-        @foreach (var item in events)
-        {
-            <li>
-                <strong>@item.Name</strong>
-                -
-                <a href="@item.Url" target="_blank" rel="noopener noreferrer">
-                    View Tickets
-                </a>
-            </li>
-        }
-    </ul>
-}
+<div class="row">
+    @foreach (var item in events)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+
+                @if (item.Images?.Count > 0)
+                {
+                    <img src="@item.Images[0].Url"
+                         class="card-img-top"
+                         alt="@item.Name"
+                         style="height:200px; object-fit:cover;" />
+                }
+
+                <div class="card-body">
+                    <h5 class="card-title">@item.Name</h5>
+
+                    <p>
+                        <strong>Date:</strong>
+                        @item.Dates?.Start?.LocalDate
+                    </p>
+
+                    <p>
+                        <strong>Time:</strong>
+                        @item.Dates?.Start?.LocalTime
+                    </p>
+
+                    <p>
+                        <strong>Venue:</strong>
+                        @item.Embedded?.Venues?.FirstOrDefault()?.Name
+                    </p>
+
+                    <p>
+                        <strong>City:</strong>
+                        @item.Embedded?.Venues?.FirstOrDefault()?.City?.Name
+                    </p>
+
+                    @if (!string.IsNullOrWhiteSpace(item.Url))
+                    {
+                        <a href="@item.Url"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="btn btn-primary">
+                            View Tickets
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     private List<EventPlanner.Models.Event> events = new();

@@ -12,4 +12,13 @@ public class Event
 
     [JsonProperty("url")]
     public string? Url { get; set; }
+    
+    [JsonProperty("dates")]
+    public EventDates? Dates { get; set; }
+
+    [JsonProperty("images")]
+    public List<EventImage>? Images { get; set; }
+
+    [JsonProperty("_embedded")]
+    public EventVenueEmbedded? Embedded { get; set; }
 }
