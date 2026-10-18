@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using EventPlanner.Services
 @inject EventService EventService
+@inject WeatherService WeatherService
 
 <PageTitle>Event Planner</PageTitle>
 
@@ -30,6 +31,12 @@
 <button class="btn btn-primary mb-3" @onclick="LoadEvents">
     Search Events
 </button>
+
+<button class="btn btn-success mb-3 ms-2" @onclick="TestWeather">
+    Test Weather API
+</button>
+
+<p>@weatherMessage</p>
 
 <p>@message</p>
 
@@ -105,6 +112,35 @@
         {
             events.Clear();
             message = $"Error: {ex.Message}";
+        }
+    }
+    
+    private string weatherMessage = "";
+
+    private async Task TestWeather()
+    {
+        weatherMessage = "Loading weather...";
+
+        try
+        {
+            // Dublin coordinates for testing
+            var weather = await WeatherService.GetWeatherAsync(
+                53.3498, -6.2603);
+
+            if (weather?.Current != null)
+            {
+                weatherMessage =
+                    $"Dublin Temperature: {weather.Current.Temperature}°C, " +
+                    $"Precipitation: {weather.Current.Precipitation} mm";
+            }
+            else
+            {
+                weatherMessage = "No weather data available.";
+            }
+        }
+        catch (Exception ex)
+        {
+            weatherMessage = $"Weather Error: {ex.Message}";
         }
     }
 }

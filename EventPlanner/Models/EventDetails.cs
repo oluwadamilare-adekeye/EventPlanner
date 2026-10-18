@@ -36,10 +36,22 @@ public class EventVenue
 
     [JsonProperty("city")]
     public EventCity? City { get; set; }
+    
+    [JsonProperty("location")]
+    public EventLocation? Location { get; set; }
 }
 
 public class EventCity
 {
     [JsonProperty("name")]
     public string? Name { get; set; }
+}
+
+public class EventLocation
+{
+    [JsonProperty("latitude")]
+    public string? Latitude { get; set; }
+
+    [JsonProperty("longitude")]
+    public string? Longitude { get; set; }
 }
