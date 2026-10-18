@@ -29,6 +29,17 @@
     </select>
 </div>
 
+<div class="mb-3">
+    <label class="form-label">Select Category</label>
+
+    <select class="form-select" @bind="selectedCategory">
+        <option value="">All Categories</option>
+        <option value="Music">Music</option>
+        <option value="Sports">Sports</option>
+        <option value="Arts &amp; Theatre">Arts &amp; Theatre</option>
+    </select>
+</div>
+
 <button class="btn btn-primary mb-3" @onclick="LoadEvents">
     Search Events
 </button>
@@ -104,6 +115,8 @@
     private string message = "Click the button to load events.";
     private string searchKeyword = "";
     private string selectedCity = "";
+    private string selectedCategory = "";
+    
     private Dictionary<string, string> weatherMessages = new();
 
     private async Task LoadEvents()
@@ -113,7 +126,7 @@
 
         try
         {
-            events = await EventService.GetEventsAsync(searchKeyword, selectedCity);
+            events = await EventService.GetEventsAsync(searchKeyword, selectedCity, selectedCategory);
             message = $"Found {events.Count} events!";
         }
         catch (Exception ex)

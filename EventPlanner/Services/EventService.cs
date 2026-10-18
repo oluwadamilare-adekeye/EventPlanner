@@ -14,9 +14,8 @@ public class EventService
         _apiKey = configuration["Ticketmaster:ApiKey"]
                   ?? throw new InvalidOperationException("Ticketmaster API key is missing.");
     }
-
     
-    public async Task<List<EventPlanner.Models.Event>> GetEventsAsync(string keyword, string city)
+    public async Task<List<EventPlanner.Models.Event>> GetEventsAsync(string keyword, string city, string category)
     {
         var client = new RestClient("https://app.ticketmaster.com/discovery/v2/");
         var request = new RestRequest("events.json", Method.Get);
@@ -33,6 +32,11 @@ public class EventService
         if (!string.IsNullOrWhiteSpace(city))
         {
             request.AddParameter("city", city);
+        }
+        
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            request.AddParameter("classificationName", category);
         }
 
         var response = await client.ExecuteAsync(request);
