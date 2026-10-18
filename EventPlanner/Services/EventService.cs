@@ -16,7 +16,7 @@ public class EventService
     }
 
     
-    public async Task<List<EventPlanner.Models.Event>> GetEventsAsync()
+    public async Task<List<EventPlanner.Models.Event>> GetEventsAsync(string keyword)
     {
         var client = new RestClient("https://app.ticketmaster.com/discovery/v2/");
         var request = new RestRequest("events.json", Method.Get);
@@ -24,6 +24,11 @@ public class EventService
         request.AddParameter("apikey", _apiKey);
         request.AddParameter("countryCode", "IE");
         request.AddParameter("size", 5);
+        
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            request.AddParameter("keyword", keyword);
+        }
 
         var response = await client.ExecuteAsync(request);
 

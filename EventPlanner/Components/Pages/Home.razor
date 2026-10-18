@@ -8,8 +8,14 @@
 <h1>Event Planner</h1>
 <p>Discover events happening in Ireland.</p>
 
+<div class="mb-3">
+    <input class="form-control"
+           placeholder="Search for concerts, artists or events..."
+           @bind="searchKeyword" />
+</div>
+
 <button class="btn btn-primary mb-3" @onclick="LoadEvents">
-    Get Events
+    Search Events
 </button>
 
 <p>@message</p>
@@ -69,6 +75,7 @@
 @code {
     private List<EventPlanner.Models.Event> events = new();
     private string message = "Click the button to load events.";
+    private string searchKeyword = "";
 
     private async Task LoadEvents()
     {
@@ -76,7 +83,7 @@
 
         try
         {
-            events = await EventService.GetEventsAsync();
+            events = await EventService.GetEventsAsync(searchKeyword);
 
             message = $"Found {events.Count} events!";
         }
