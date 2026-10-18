@@ -1,4 +1,5 @@
-﻿@page "/"
+﻿
+@page "/"
 @rendermode InteractiveServer
 @using EventPlanner.Services
 @inject EventService EventService
@@ -31,12 +32,6 @@
 <button class="btn btn-primary mb-3" @onclick="LoadEvents">
     Search Events
 </button>
-
-<button class="btn btn-success mb-3 ms-2" @onclick="TestWeather">
-    Test Weather API
-</button>
-
-<p>@weatherMessage</p>
 
 <p>@message</p>
 
@@ -86,6 +81,18 @@
                             View Tickets
                         </a>
                     }
+
+                    <button class="btn btn-success mt-2"
+                            @onclick="() => CheckEventWeather(item)">
+                        Check Weather
+                    </button>
+
+                    @if (weatherMessages.ContainsKey(item.Id ?? ""))
+                    {
+                        <p class="mt-2">
+                            @weatherMessages[item.Id ?? ""]
+                        </p>
+                    }
                 </div>
             </div>
         </div>
@@ -97,15 +104,16 @@
     private string message = "Click the button to load events.";
     private string searchKeyword = "";
     private string selectedCity = "";
+    private Dictionary<string, string> weatherMessages = new();
 
     private async Task LoadEvents()
     {
+        weatherMessages.Clear();
         message = "Loading events...";
 
         try
         {
             events = await EventService.GetEventsAsync(searchKeyword, selectedCity);
-
             message = $"Found {events.Count} events!";
         }
         catch (Exception ex)
@@ -114,33 +122,70 @@
             message = $"Error: {ex.Message}";
         }
     }
-    
-    private string weatherMessage = "";
 
-    private async Task TestWeather()
+    private async Task CheckEventWeather(EventPlanner.Models.Event item)
     {
-        weatherMessage = "Loading weather...";
+        string eventId = item.Id ?? "";
+
+        var venue = item.Embedded?.Venues?.FirstOrDefault();
+        string? dateText = item.Dates?.Start?.LocalDate;
+
+        if (venue?.Location == null ||
+            !double.TryParse(venue.Location.Latitude,
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out double latitude) ||
+            !double.TryParse(venue.Location.Longitude,
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out double longitude))
+        {
+            weatherMessages[eventId] = "Venue coordinates unavailable.";
+            return;
+        }
+
+        if (!DateOnly.TryParseExact(dateText, "yyyy-MM-dd",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None,
+                out DateOnly eventDate))
+        {
+            weatherMessages[eventId] = "Event date unavailable.";
+            return;
+        }
+
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (eventDate < today || eventDate > today.AddDays(15))
+        {
+            weatherMessages[eventId] =
+                "Weather forecast not available yet. Check closer to the event date.";
+            return;
+        }
+
+        weatherMessages[eventId] = "Loading weather...";
 
         try
         {
-            // Dublin coordinates for testing
-            var weather = await WeatherService.GetWeatherAsync(
-                53.3498, -6.2603);
+            var weather = await WeatherService.GetEventForecastAsync(
+                latitude, longitude, eventDate);
 
-            if (weather?.Current != null)
+            if (weather?.Daily?.MaxTemperature?.Count > 0 &&
+                weather.Daily.MinTemperature?.Count > 0 &&
+                weather.Daily.RainProbability?.Count > 0)
             {
-                weatherMessage =
-                    $"Dublin Temperature: {weather.Current.Temperature}°C, " +
-                    $"Precipitation: {weather.Current.Precipitation} mm";
+                weatherMessages[eventId] =
+                    $"Temperature: {weather.Daily.MinTemperature[0]}°C - " +
+                    $"{weather.Daily.MaxTemperature[0]}°C, " +
+                    $"Rain probability: {weather.Daily.RainProbability[0]}%";
             }
             else
             {
-                weatherMessage = "No weather data available.";
+                weatherMessages[eventId] = "Forecast unavailable.";
             }
         }
         catch (Exception ex)
         {
-            weatherMessage = $"Weather Error: {ex.Message}";
+            weatherMessages[eventId] = $"Weather error: {ex.Message}";
         }
     }
 }
