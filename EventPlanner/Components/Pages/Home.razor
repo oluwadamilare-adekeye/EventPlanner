@@ -14,6 +14,19 @@
            @bind="searchKeyword" />
 </div>
 
+<div class="mb-3">
+    <label class="form-label">Select City</label>
+
+    <select class="form-select" @bind="selectedCity">
+        <option value="">All Cities</option>
+        <option value="Dublin">Dublin</option>
+        <option value="Cork">Cork</option>
+        <option value="Galway">Galway</option>
+        <option value="Limerick">Limerick</option>
+        <option value="Waterford">Waterford</option>
+    </select>
+</div>
+
 <button class="btn btn-primary mb-3" @onclick="LoadEvents">
     Search Events
 </button>
@@ -76,6 +89,7 @@
     private List<EventPlanner.Models.Event> events = new();
     private string message = "Click the button to load events.";
     private string searchKeyword = "";
+    private string selectedCity = "";
 
     private async Task LoadEvents()
     {
@@ -83,7 +97,7 @@
 
         try
         {
-            events = await EventService.GetEventsAsync(searchKeyword);
+            events = await EventService.GetEventsAsync(searchKeyword, selectedCity);
 
             message = $"Found {events.Count} events!";
         }
