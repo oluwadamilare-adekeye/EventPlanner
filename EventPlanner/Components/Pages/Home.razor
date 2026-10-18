@@ -19,7 +19,8 @@
 <div class="mb-3">
     <label class="form-label">Select City</label>
 
-    <select class="form-select" @bind="selectedCity">
+    <select class="form-select" @bind="selectedCity"
+            @bind:after="LoadEvents">
         <option value="">All Cities</option>
         <option value="Dublin">Dublin</option>
         <option value="Cork">Cork</option>
@@ -32,11 +33,24 @@
 <div class="mb-3">
     <label class="form-label">Select Category</label>
 
-    <select class="form-select" @bind="selectedCategory">
+    <select class="form-select" @bind="selectedCategory"
+            @bind:after="LoadEvents">
         <option value="">All Categories</option>
         <option value="Music">Music</option>
         <option value="Sports">Sports</option>
         <option value="Arts &amp; Theatre">Arts &amp; Theatre</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Sort Events</label>
+
+    <select class="form-select" @bind="selectedSort"
+            @bind:after="SortEvents">
+        <option value="dateAsc">Date: Earliest First</option>
+        <option value="dateDesc">Date: Latest First</option>
+        <option value="nameAsc">Event Name: A-Z</option>
+        <option value="nameDesc">Event Name: Z-A</option>
     </select>
 </div>
 
@@ -116,6 +130,7 @@
     private string searchKeyword = "";
     private string selectedCity = "";
     private string selectedCategory = "";
+    private string selectedSort = "dateAsc";
     
     private Dictionary<string, string> weatherMessages = new();
 
@@ -127,6 +142,9 @@
         try
         {
             events = await EventService.GetEventsAsync(searchKeyword, selectedCity, selectedCategory);
+            
+            SortEvents();
+            
             message = $"Found {events.Count} events!";
         }
         catch (Exception ex)
@@ -199,6 +217,26 @@
         catch (Exception ex)
         {
             weatherMessages[eventId] = $"Weather error: {ex.Message}";
+        }
+    }
+    
+    private void SortEvents()
+    {
+        if (selectedSort == "dateAsc")
+        {
+            events = events.OrderBy(e => e.Dates?.Start?.LocalDate).ToList();
+        }
+        else if (selectedSort == "dateDesc")
+        {
+            events = events.OrderByDescending(e => e.Dates?.Start?.LocalDate).ToList();
+        }
+        else if (selectedSort == "nameAsc")
+        {
+            events = events.OrderBy(e => e.Name).ToList();
+        }
+        else if (selectedSort == "nameDesc")
+        {
+            events = events.OrderByDescending(e => e.Name).ToList();
         }
     }
 }
