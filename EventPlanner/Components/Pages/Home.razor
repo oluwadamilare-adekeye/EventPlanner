@@ -134,11 +134,11 @@
     private string selectedSort = "dateAsc";
 
     private Dictionary<string, string> weatherMessages = new();
-
+    
     private async Task LoadEvents()
     {
         weatherMessages.Clear();
-        message = "Loading events...";
+        message = "Searching for events...";
 
         try
         {
@@ -147,12 +147,24 @@
 
             SortEvents();
 
-            message = $"Found {events.Count} events!";
+            if (events.Count == 0)
+            {
+                message = "No events found. Try a different search or filter.";
+            }
+            else
+            {
+                message = $"Found {events.Count} events!";
+            }
         }
-        catch (Exception ex)
+        catch (HttpRequestException)
         {
             events.Clear();
-            message = $"Error: {ex.Message}";
+            message = "Unable to retrieve events. Please try again later.";
+        }
+        catch (Exception)
+        {
+            events.Clear();
+            message = "Something went wrong while loading events.";
         }
     }
 
@@ -226,9 +238,15 @@
                 weatherMessages[eventId] = "Forecast unavailable.";
             }
         }
-        catch (Exception ex)
+        catch (HttpRequestException)
         {
-            weatherMessages[eventId] = $"Weather error: {ex.Message}";
+            weatherMessages[eventId] =
+                "Weather service is temporarily unavailable. Please try again.";
+        }
+        catch (Exception)
+        {
+            weatherMessages[eventId] =
+                "Unable to load the weather forecast.";
         }
     }
 
