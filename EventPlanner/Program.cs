@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<WeatherService>();
 builder.Services.AddScoped<EventSorter>();
+builder.Services.AddScoped<WeatherValidator>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

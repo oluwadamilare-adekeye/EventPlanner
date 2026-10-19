@@ -1,6 +1,4 @@
-﻿using EventPlanner.Models;
-
-namespace EventPlanner.Services;
+﻿namespace EventPlanner.Services;
 
 public class EventSorter
 {

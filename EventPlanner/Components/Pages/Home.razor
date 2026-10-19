@@ -4,6 +4,7 @@
 @inject EventService EventService
 @inject WeatherService WeatherService
 @inject EventSorter EventSorter
+@inject WeatherValidator WeatherValidator
 
 <PageTitle>Event Planner</PageTitle>
 
@@ -131,7 +132,7 @@
     private string selectedCity = "";
     private string selectedCategory = "";
     private string selectedSort = "dateAsc";
-    
+
     private Dictionary<string, string> weatherMessages = new();
 
     private async Task LoadEvents()
@@ -141,10 +142,11 @@
 
         try
         {
-            events = await EventService.GetEventsAsync(searchKeyword, selectedCity, selectedCategory);
-            
+            events = await EventService.GetEventsAsync(
+                searchKeyword, selectedCity, selectedCategory);
+
             SortEvents();
-            
+
             message = $"Found {events.Count} events!";
         }
         catch (Exception ex)
@@ -161,6 +163,7 @@
         var venue = item.Embedded?.Venues?.FirstOrDefault();
         string? dateText = item.Dates?.Start?.LocalDate;
 
+        // Check that venue coordinates exist and can be converted.
         if (venue?.Location == null ||
             !double.TryParse(venue.Location.Latitude,
                 System.Globalization.NumberStyles.Float,
@@ -175,6 +178,14 @@
             return;
         }
 
+        // Check that coordinates are within valid geographical ranges.
+        if (!WeatherValidator.AreCoordinatesValid(latitude, longitude))
+        {
+            weatherMessages[eventId] = "Invalid venue coordinates.";
+            return;
+        }
+
+        // Check that the event date is valid.
         if (!DateOnly.TryParseExact(dateText, "yyyy-MM-dd",
                 System.Globalization.CultureInfo.InvariantCulture,
                 System.Globalization.DateTimeStyles.None,
@@ -186,7 +197,8 @@
 
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
-        if (eventDate < today || eventDate > today.AddDays(15))
+        // Only request weather within the supported forecast window.
+        if (!WeatherValidator.IsDateValid(eventDate, today))
         {
             weatherMessages[eventId] =
                 "Weather forecast not available yet. Check closer to the event date.";
@@ -219,7 +231,7 @@
             weatherMessages[eventId] = $"Weather error: {ex.Message}";
         }
     }
-    
+
     private void SortEvents()
     {
         events = EventSorter.SortEvents(events, selectedSort);
