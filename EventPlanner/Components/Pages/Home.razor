@@ -1,9 +1,9 @@
-﻿
-@page "/"
+﻿@page "/"
 @rendermode InteractiveServer
 @using EventPlanner.Services
 @inject EventService EventService
 @inject WeatherService WeatherService
+@inject EventSorter EventSorter
 
 <PageTitle>Event Planner</PageTitle>
 
@@ -222,21 +222,6 @@
     
     private void SortEvents()
     {
-        if (selectedSort == "dateAsc")
-        {
-            events = events.OrderBy(e => e.Dates?.Start?.LocalDate).ToList();
-        }
-        else if (selectedSort == "dateDesc")
-        {
-            events = events.OrderByDescending(e => e.Dates?.Start?.LocalDate).ToList();
-        }
-        else if (selectedSort == "nameAsc")
-        {
-            events = events.OrderBy(e => e.Name).ToList();
-        }
-        else if (selectedSort == "nameDesc")
-        {
-            events = events.OrderByDescending(e => e.Name).ToList();
-        }
+        events = EventSorter.SortEvents(events, selectedSort);
     }
 }
