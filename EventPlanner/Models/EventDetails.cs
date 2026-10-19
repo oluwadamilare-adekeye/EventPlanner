@@ -21,6 +21,9 @@ public class EventImage
 {
     [JsonProperty("url")]
     public string? Url { get; set; }
+    
+    [JsonProperty("width")]
+    public int Width { get; set; }
 }
 
 public class EventVenueEmbedded
