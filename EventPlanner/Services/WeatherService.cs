@@ -4,7 +4,7 @@ using EventPlanner.Models;
 
 namespace EventPlanner.Services;
 
-public class WeatherService
+public class WeatherService : IWeatherService
 {
     private const string WEATHER_URL = "https://api.open-meteo.com/v1/forecast";
     

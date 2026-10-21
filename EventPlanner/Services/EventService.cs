@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace EventPlanner.Services;
 
-public class EventService
+public class EventService : IEventService
 {
     private readonly string _apiKey;
 

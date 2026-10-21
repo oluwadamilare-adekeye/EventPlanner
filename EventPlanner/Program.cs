@@ -2,8 +2,8 @@ using EventPlanner.Components;
 using EventPlanner.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddScoped<EventService>();
-builder.Services.AddScoped<WeatherService>();
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IWeatherService, WeatherService>();
 builder.Services.AddScoped<EventSorter>();
 builder.Services.AddScoped<WeatherValidator>();
 
