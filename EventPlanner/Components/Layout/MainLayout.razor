@@ -1,23 +1,37 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
+<div class="app-layout">
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+    <header class="app-header">
+        <div class="header-container">
+
+            <a href="/" class="brand">
+                <span class="brand-icon">✦</span>
+                <span>EventPlanner</span>
+            </a>
+
+            <nav class="header-nav">
+                <a href="/" class="nav-link">
+                    Discover Events
+                </a>
+            </nav>
+
         </div>
+    </header>
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="app-main">
+        @Body
     </main>
+
+    <footer class="app-footer">
+        <p>EventPlanner — Discover events. Plan smarter.</p>
+        <p>Powered by Ticketmaster &amp; Open-Meteo</p>
+    </footer>
+
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
+    An unexpected error has occurred.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>

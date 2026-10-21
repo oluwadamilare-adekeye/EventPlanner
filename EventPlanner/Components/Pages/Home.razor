@@ -6,144 +6,203 @@
 @inject EventSorter EventSorter
 @inject WeatherValidator WeatherValidator
 
-<PageTitle>Event Planner</PageTitle>
+<PageTitle>EventPlanner | Discover Events</PageTitle>
 
-<h1>Event Planner</h1>
-<p>Discover events happening in Ireland.</p>
+<section class="search-section">
+    <div class="hero-content">
+        <span class="hero-label">DISCOVER • EXPLORE • PLAN</span>
 
-<div class="mb-3">
-    <input class="form-control"
-           placeholder="Search for concerts, artists or events..."
-           @bind="searchKeyword" />
-</div>
+        <h1>Discover your next experience.</h1>
 
-<div class="mb-3">
-    <label class="form-label">Select City</label>
+        <p class="search-subtitle">
+            Find unforgettable events across Ireland and plan
+            ahead with live weather forecasts.
+        </p>
+    </div>
 
-    <select class="form-select" @bind="selectedCity"
-            @bind:after="LoadEvents">
-        <option value="">All Cities</option>
-        <option value="Dublin">Dublin</option>
-        <option value="Cork">Cork</option>
-        <option value="Galway">Galway</option>
-        <option value="Limerick">Limerick</option>
-        <option value="Waterford">Waterford</option>
-    </select>
-</div>
+    <div class="search-panel">
+        <div class="mb-3">
+            <label class="form-label" for="event-search">
+                Search Events
+            </label>
 
-<div class="mb-3">
-    <label class="form-label">Select Category</label>
+            <input id="event-search"
+                   class="form-control"
+                   placeholder="Search concerts, artists or events..."
+                   @bind="searchKeyword" />
+        </div>
 
-    <select class="form-select" @bind="selectedCategory"
-            @bind:after="LoadEvents">
-        <option value="">All Categories</option>
-        <option value="Music">Music</option>
-        <option value="Sports">Sports</option>
-        <option value="Arts &amp; Theatre">Arts &amp; Theatre</option>
-    </select>
-</div>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label" for="city-filter">City</label>
 
-<div class="mb-3">
-    <label class="form-label">Sort Events</label>
+                <select id="city-filter"
+                        class="form-select"
+                        @bind="selectedCity"
+                        @bind:after="LoadEvents">
+                    <option value="">All Cities</option>
+                    <option value="Dublin">Dublin</option>
+                    <option value="Cork">Cork</option>
+                    <option value="Galway">Galway</option>
+                    <option value="Limerick">Limerick</option>
+                    <option value="Waterford">Waterford</option>
+                </select>
+            </div>
 
-    <select class="form-select" @bind="selectedSort"
-            @bind:after="SortEvents">
-        <option value="dateAsc">Date: Earliest First</option>
-        <option value="dateDesc">Date: Latest First</option>
-        <option value="nameAsc">Event Name: A-Z</option>
-        <option value="nameDesc">Event Name: Z-A</option>
-    </select>
-</div>
+            <div class="col-md-4">
+                <label class="form-label" for="category-filter">Category</label>
 
-<button class="btn btn-primary mb-3" @onclick="LoadEvents">
-    Search Events
-</button>
+                <select id="category-filter"
+                        class="form-select"
+                        @bind="selectedCategory"
+                        @bind:after="LoadEvents">
+                    <option value="">All Categories</option>
+                    <option value="Music">Music</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Arts &amp; Theatre">Arts &amp; Theatre</option>
+                </select>
+            </div>
 
-<p>@message</p>
+            <div class="col-md-4">
+                <label class="form-label" for="sort-filter">Sort By</label>
 
-<div class="row">
-    @foreach (var item in events)
-    {
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                
-                @if (item.Images?.Count > 0)
-                {
-                    var image = item.Images
-                        .OrderByDescending(i => i.Width)
-                        .FirstOrDefault();
-
-                    <img src="@image?.Url"
-                         class="card-img-top"
-                         alt="@item.Name"
-                         loading="lazy"
-                         style="height:200px; object-fit:cover;" />
-                }
-
-                <div class="card-body">
-                    <h5 class="card-title">@item.Name</h5>
-
-                    <p>
-                        <strong>Date:</strong>
-                        @item.Dates?.Start?.LocalDate
-                    </p>
-
-                    <p>
-                        <strong>Time:</strong>
-                        @item.Dates?.Start?.LocalTime
-                    </p>
-
-                    <p>
-                        <strong>Venue:</strong>
-                        @item.Embedded?.Venues?.FirstOrDefault()?.Name
-                    </p>
-
-                    <p>
-                        <strong>City:</strong>
-                        @item.Embedded?.Venues?.FirstOrDefault()?.City?.Name
-                    </p>
-
-                    @if (!string.IsNullOrWhiteSpace(item.Url))
-                    {
-                        <a href="@item.Url"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="btn btn-primary">
-                            View Tickets
-                        </a>
-                    }
-
-                    <button class="btn btn-success mt-2"
-                            @onclick="() => CheckEventWeather(item)">
-                        Check Weather
-                    </button>
-
-                    @if (weatherMessages.ContainsKey(item.Id ?? ""))
-                    {
-                        <p class="mt-2">
-                            @weatherMessages[item.Id ?? ""]
-                        </p>
-                    }
-                </div>
+                <select id="sort-filter"
+                        class="form-select"
+                        @bind="selectedSort"
+                        @bind:after="SortEvents">
+                    <option value="dateAsc">Date: Earliest First</option>
+                    <option value="dateDesc">Date: Latest First</option>
+                    <option value="nameAsc">Event Name: A-Z</option>
+                    <option value="nameDesc">Event Name: Z-A</option>
+                </select>
             </div>
         </div>
+
+        <button class="btn btn-primary search-button mt-3"
+                @onclick="LoadEvents"
+                disabled="@isLoading">
+            @(isLoading ? "Searching..." : "Search Events")
+        </button>
+    </div>
+</section>
+
+<section class="results-section">
+    <div class="results-header">
+        <div>
+            <h2>Explore Events</h2>
+            <p class="results-message" role="status">@message</p>
+        </div>
+    </div>
+
+    @if (events.Count > 0)
+    {
+        <div class="row g-4">
+            @foreach (var item in events)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <div class="card event-card h-100">
+
+                        @if (item.Images?.Count > 0)
+                        {
+                            var image = item.Images
+                                .Where(i => !string.IsNullOrWhiteSpace(i.Url))
+                                .OrderByDescending(i => i.Width)
+                                .FirstOrDefault();
+
+                            @if (image != null)
+                            {
+                                <img src="@image.Url"
+                                     class="card-img-top"
+                                     alt="@item.Name"
+                                     loading="lazy" />
+                            }
+                        }
+
+                        <div class="card-body">
+                            <h3 class="card-title">
+                                @item.Name
+                            </h3>
+
+                            <div class="event-details">
+                                <p>
+                                    <span class="detail-label">Date</span>
+                                    <span>@(item.Dates?.Start?.LocalDate ?? "Unavailable")</span>
+                                </p>
+
+                                <p>
+                                    <span class="detail-label">Time</span>
+                                    <span>@(item.Dates?.Start?.LocalTime ?? "Unavailable")</span>
+                                </p>
+
+                                <p>
+                                    <span class="detail-label">Venue</span>
+                                    <span>@(item.Embedded?.Venues?.FirstOrDefault()?.Name ?? "Unavailable")</span>
+                                </p>
+
+                                <p>
+                                    <span class="detail-label">City</span>
+                                    <span>@(item.Embedded?.Venues?.FirstOrDefault()?.City?.Name ?? "Unavailable")</span>
+                                </p>
+                            </div>
+
+                            <div class="event-actions">
+                                @if (!string.IsNullOrWhiteSpace(item.Url))
+                                {
+                                    <a href="@item.Url"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="btn btn-primary">
+                                        View Tickets ↗
+                                    </a>
+                                }
+
+                                <button class="btn btn-success"
+                                        @onclick="() => CheckEventWeather(item)">
+                                    Check Weather
+                                </button>
+                            </div>
+
+                            @if (weatherMessages.TryGetValue(item.Id ?? "", out var forecastMessage))
+                            {
+                                <div class="weather-result" role="status">
+                                    <span class="weather-symbol">☁</span>
+                                    <span>@forecastMessage</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
     }
-</div>
+    else if (!isLoading && hasSearched)
+    {
+        <div class="empty-state">
+            <h3>No matching events</h3>
+            <p>Try another keyword, city or category to discover more events.</p>
+        </div>
+    }
+</section>
 
 @code {
     private List<EventPlanner.Models.Event> events = new();
-    private string message = "Click the button to load events.";
+    private string message = "Use the search above to discover events.";
     private string searchKeyword = "";
     private string selectedCity = "";
     private string selectedCategory = "";
     private string selectedSort = "dateAsc";
 
+    private bool isLoading = false;
+    private bool hasSearched = false;
+
     private Dictionary<string, string> weatherMessages = new();
-    
+
     private async Task LoadEvents()
     {
-        weatherMessages.Clear();
+        isLoading = true;
         message = "Searching for events...";
+
+        weatherMessages.Clear();
 
         try
         {
@@ -152,14 +211,9 @@
 
             SortEvents();
 
-            if (events.Count == 0)
-            {
-                message = "No events found. Try a different search or filter.";
-            }
-            else
-            {
-                message = $"Found {events.Count} events!";
-            }
+            message = events.Count == 0
+                ? "No events found. Try a different search or filter."
+                : $"Found {events.Count} events!";
         }
         catch (HttpRequestException)
         {
@@ -171,6 +225,11 @@
             events.Clear();
             message = "Something went wrong while loading events.";
         }
+        finally
+        {
+            isLoading = false;
+            hasSearched = true;
+        }
     }
 
     private async Task CheckEventWeather(EventPlanner.Models.Event item)
@@ -180,7 +239,7 @@
         var venue = item.Embedded?.Venues?.FirstOrDefault();
         string? dateText = item.Dates?.Start?.LocalDate;
 
-        // Check that venue coordinates exist and can be converted.
+        // Convert Ticketmaster's venue coordinates to numbers.
         if (venue?.Location == null ||
             !double.TryParse(venue.Location.Latitude,
                 System.Globalization.NumberStyles.Float,
@@ -195,14 +254,14 @@
             return;
         }
 
-        // Check that coordinates are within valid geographical ranges.
+        // Validate coordinates before requesting weather data.
         if (!WeatherValidator.AreCoordinatesValid(latitude, longitude))
         {
             weatherMessages[eventId] = "Invalid venue coordinates.";
             return;
         }
 
-        // Check that the event date is valid.
+        // Convert the event date from text to a DateOnly value.
         if (!DateOnly.TryParseExact(dateText, "yyyy-MM-dd",
                 System.Globalization.CultureInfo.InvariantCulture,
                 System.Globalization.DateTimeStyles.None,
@@ -214,15 +273,15 @@
 
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
-        // Only request weather within the supported forecast window.
+        // Open-Meteo forecasts are limited to the supported date range.
         if (!WeatherValidator.IsDateValid(eventDate, today))
         {
             weatherMessages[eventId] =
-                "Weather forecast not available yet. Check closer to the event date.";
+                "Forecast not available yet. Check closer to the event date.";
             return;
         }
 
-        weatherMessages[eventId] = "Loading weather...";
+        weatherMessages[eventId] = "Loading forecast...";
 
         try
         {
@@ -234,8 +293,8 @@
                 weather.Daily.RainProbability?.Count > 0)
             {
                 weatherMessages[eventId] =
-                    $"Temperature: {weather.Daily.MinTemperature[0]}°C - " +
-                    $"{weather.Daily.MaxTemperature[0]}°C, " +
+                    $"Temperature: {weather.Daily.MinTemperature[0]}°C – " +
+                    $"{weather.Daily.MaxTemperature[0]}°C | " +
                     $"Rain probability: {weather.Daily.RainProbability[0]}%";
             }
             else
@@ -250,8 +309,7 @@
         }
         catch (Exception)
         {
-            weatherMessages[eventId] =
-                "Unable to load the weather forecast.";
+            weatherMessages[eventId] = "Unable to load the weather forecast.";
         }
     }
 
